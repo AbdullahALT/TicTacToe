@@ -6,6 +6,9 @@
 package ui;
 
 import ai.MinmaxAlgorithm;
+import java.awt.Dimension;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import models.Player;
 import java.util.List;
 import java.util.Random;
@@ -15,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import models.Position;
+import models.Sign;
 
 /**
  *
@@ -25,13 +29,36 @@ public class Main extends javax.swing.JFrame {
     private State state;
     private  Board board;
     private boolean gameOver;
+    private Sign humanSign;
+    private Sign x;
+    private Sign o;
     
     /**
      * Creates new form Main
      */
     public Main() {
         initComponents();
+	
+	humanSignChoice.add("Play as X");
+	humanSignChoice.add("Play as O");
+	
+	x = new Sign("/resources/x.png", "X Turn", Sign.Type.X); 
+	o = new Sign("/resources/o.png", "O Turn", Sign.Type.O);
+	
+	humanSign = x;
         setGame();
+	
+	
+	humanSignChoice.addItemListener(new ItemListener() {
+	    @Override
+	    public void itemStateChanged(ItemEvent e) {
+		changeSign();
+	    }
+	});
+	
+	turnLabel.setMinimumSize(new Dimension(100, 100));
+	turnLabel.setPreferredSize(new Dimension(100, 100));
+	turnLabel.setMaximumSize(new Dimension(100, 100));
     }
     
     public void setGame(){
@@ -55,7 +82,8 @@ public class Main extends javax.swing.JFrame {
         board.initCell(2, 0, cell_20);
         board.initCell(2, 1, cell_21);
         board.initCell(2, 2, cell_22);
-        state = new State(board);
+	Sign enemySign = (humanSign == x)? o : x;
+        state = new State(board, humanSign, enemySign);
 	gameOver = false;
 	
 	if(state.isComputerPlaying())
@@ -87,6 +115,7 @@ public class Main extends javax.swing.JFrame {
         cell_22 = new ui.CustomButton();
         jPanel3 = new javax.swing.JPanel();
         turnLabel = new javax.swing.JLabel();
+        humanSignChoice = new java.awt.Choice();
         resetButton = new java.awt.Button();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -160,11 +189,25 @@ public class Main extends javax.swing.JFrame {
 
         jPanel2.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 110, 410, 270));
 
-        jPanel3.setLayout(new java.awt.BorderLayout(50, 50));
+        jPanel3.setLayout(new java.awt.BorderLayout());
 
         turnLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         turnLabel.setText("Turn Indicator");
         jPanel3.add(turnLabel, java.awt.BorderLayout.CENTER);
+
+        humanSignChoice.addInputMethodListener(new java.awt.event.InputMethodListener() {
+            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
+                changeSign(evt);
+            }
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
+            }
+        });
+        humanSignChoice.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                humanSignChoicePropertyChange(evt);
+            }
+        });
+        jPanel3.add(humanSignChoice, java.awt.BorderLayout.PAGE_START);
 
         resetButton.setLabel("Reset");
         resetButton.addActionListener(new java.awt.event.ActionListener() {
@@ -210,7 +253,28 @@ public class Main extends javax.swing.JFrame {
         // TODO add your handling code here:
 	setGame();
     }//GEN-LAST:event_resetButtonActionPerformed
+
+    private void changeSign(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_changeSign
+        // TODO add your handling code here:
+	
+	
+    }//GEN-LAST:event_changeSign
+
+    private void humanSignChoicePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_humanSignChoicePropertyChange
+        // TODO add your handling code here:
+	changeSign();
+    }//GEN-LAST:event_humanSignChoicePropertyChange
   
+    
+    private void changeSign(){
+	int index = humanSignChoice.getSelectedIndex();
+	if(index == 0)
+	    humanSign = x;
+	else 
+	    humanSign = o;
+	setGame();
+	System.out.println("Heeey");
+    }
     
     public void playComputer(){
 	
@@ -298,6 +362,7 @@ public class Main extends javax.swing.JFrame {
     private ui.CustomButton cell_20;
     private ui.CustomButton cell_21;
     private ui.CustomButton cell_22;
+    private java.awt.Choice humanSignChoice;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;

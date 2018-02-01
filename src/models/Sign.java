@@ -10,12 +10,18 @@ package models;
  * @author abaaltamimi
  */
 public class Sign {
+    public enum Type {
+	X, O
+    }
+    
     private String path;
     private String name;
+    private Type type;
 
-    public Sign(String path, String name) {
+    public Sign(String path, String name, Type type) {
 	this.path = path;
 	this.name = name;
+	this.type = type;
     }
 
     public String getPath() {
@@ -24,6 +30,10 @@ public class Sign {
 
     public String getName() {
 	return name;
+    }
+
+    public Type getType() {
+	return type;
     }
     
     

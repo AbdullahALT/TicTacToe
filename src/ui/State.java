@@ -20,11 +20,13 @@ public class State {
     Player currentPlayer;
     Board board;
     
-    Player human = new Human(new Sign("/resources/o.png", "O Turn"));
-    Player computer = new Computer(new Sign("/resources/x.png", "X Turn"));
+    Player human;
+    Player computer;
     
-    public State(Board board) {
-        this.currentPlayer = human;
+    public State(Board board, Sign humanSign, Sign computerSign) {
+	human = new Human(humanSign);
+	computer = new Computer(computerSign);
+        this.currentPlayer = (humanSign.getType() == Sign.Type.X)? human : computer;
         this.board = board;
     }
 
