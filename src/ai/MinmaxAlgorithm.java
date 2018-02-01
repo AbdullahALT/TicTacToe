@@ -3,33 +3,40 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ui;
+package ai;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import models.Player;
+import models.Position;
+import ui.Board;
+import ui.Cell;
+import ui.State;
 
 /**
  *
  * @author abaaltamimi
  */
-import java.util.*;
-/** AIPlayer using Minimax algorithm */
-public class Computer {
- 
-    private Board board;
+public class MinmaxAlgorithm implements AIAlgorithm{
+     private State state;
     
    /** Constructor with the given game board */
-   public Computer(Board board) {
-      this.board = board;
+   public MinmaxAlgorithm(State state) {
+      this.state = state;
    }
  
    /** Get next best move for computer. Return int[2] of {row, col} */
-   Board.Position move() {
+   @Override
+   public Position move() {
        //if the computer is the first player, play randomly
-       if(board.getEmptyPosition().size() == 9){
+       if(state.isFirstTurn()){
 	   Random rand = new Random();
-	   return new Board.Position(rand.nextInt(3), rand.nextInt(3));
+	   return new Position(rand.nextInt(3), rand.nextInt(3));
        }
        //if not, minmax the move
-      int[] result = minimax(100, Player.Computer); // depth, max turn
-      return new Board.Position(result[1], result[2]);   // row, col
+      int[] result = minimax(100, state.getComputer()); // depth, max turn
+      return new Position(result[1], result[2]);   // row, col
    }
  
    /** Recursive minimax at level of depth for either maximizing or minimizing player.
@@ -39,7 +46,7 @@ public class Computer {
       List<int[]> nextMoves = generateMoves();
  
       // mySeed is maximizing; while oppSeed is minimizing
-      int bestScore = (player == Player.Computer) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+      int bestScore = (player == state.getComputer()) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
       int currentScore;
       int bestRow = -1;
       int bestCol = -1;
@@ -50,17 +57,17 @@ public class Computer {
       } else {
          for (int[] move : nextMoves) {
             // Try this move for the current "player"
-	    Cell[][] cells = board.getCells();
-            cells[move[0]][move[1]].owner = player;
-            if (player == Player.Computer) {  // mySeed (computer) is maximizing player
-               currentScore = minimax(depth - 1, Player.Human)[0];
+	    Cell[][] cells = state.getCells();
+            cells[move[0]][move[1]].setOwner(player);
+            if (player == state.getComputer()) {  // mySeed (computer) is maximizing player
+               currentScore = minimax(depth - 1, state.getHuman())[0];
                if (currentScore > bestScore) {
                   bestScore = currentScore;
                   bestRow = move[0];
                   bestCol = move[1];
                }
             } else {  // oppSeed is minimizing player
-               currentScore = minimax(depth - 1, Player.Computer)[0];
+               currentScore = minimax(depth - 1, state.getComputer())[0];
                if (currentScore < bestScore) {
                   bestScore = currentScore;
                   bestRow = move[0];
@@ -68,7 +75,7 @@ public class Computer {
                }
             }
             // Undo move
-            cells[move[0]][move[1]].owner = null;
+            cells[move[0]][move[1]].setOwner(null);
          }
       }
       return new int[] {bestScore, bestRow, bestCol};
@@ -80,16 +87,16 @@ public class Computer {
       List<int[]> nextMoves = new ArrayList<int[]>(); // allocate List
  
       // If gameover, i.e., no next move
-      if (hasWon(Player.Computer) || hasWon(Player.Human)) {
+      if (hasWon(state.getComputer()) || hasWon(state.getHuman())) {
          return nextMoves;   // return empty list
       }
       
-      Cell[][] cells = board.getCells();
+      Cell[][] cells = state.getCells();
  
       // Search for empty cells and add to the List
       for (int row = 0; row < 3; ++row) {
          for (int col = 0; col < 3; ++col) {
-            if (cells[row][col].owner == null) {
+            if (cells[row][col].getOwner() == null) {
                nextMoves.add(new int[] {row, col});
             }
          }
@@ -122,17 +129,17 @@ public class Computer {
    private int evaluateLine(int row1, int col1, int row2, int col2, int row3, int col3) {
       int score = 0;
  
-      Cell[][] cells = board.getCells();
+      Cell[][] cells = state.getCells();
       
       // First cell
-      if (cells[row1][col1].owner == Player.Computer) {
+      if (cells[row1][col1].getOwner() == state.getComputer()) {
          score = 1;
-      } else if (cells[row1][col1].owner == Player.Human) {
+      } else if (cells[row1][col1].getOwner() == state.getHuman()) {
          score = -1;
       }
  
       // Second cell
-      if (cells[row2][col2].owner == Player.Computer) {
+      if (cells[row2][col2].getOwner() == state.getComputer()) {
          if (score == 1) {   // cell1 is mySeed
             score = 10;
          } else if (score == -1) {  // cell1 is oppSeed
@@ -140,7 +147,7 @@ public class Computer {
          } else {  // cell1 is empty
             score = 1;
          }
-      } else if (cells[row2][col2].owner == Player.Human) {
+      } else if (cells[row2][col2].getOwner() == state.getHuman()) {
          if (score == -1) { // cell1 is oppSeed
             score = -10;
          } else if (score == 1) { // cell1 is mySeed
@@ -151,7 +158,7 @@ public class Computer {
       }
  
       // Third cell
-      if (cells[row3][col3].owner == Player.Computer) {
+      if (cells[row3][col3].getOwner() == state.getComputer()) {
          if (score > 0) {  // cell1 and/or cell2 is mySeed
             score *= 10;
          } else if (score < 0) {  // cell1 and/or cell2 is oppSeed
@@ -159,7 +166,7 @@ public class Computer {
          } else {  // cell1 and cell2 are empty
             score = 1;
          }
-      } else if (cells[row3][col3].owner == Player.Human) {
+      } else if (cells[row3][col3].getOwner() == state.getHuman()) {
          if (score < 0) {  // cell1 and/or cell2 is oppSeed
             score *= 10;
          } else if (score > 1) {  // cell1 and/or cell2 is mySeed
@@ -181,11 +188,11 @@ public class Computer {
    private boolean hasWon(Player thePlayer) {
       int pattern = 0b000000000;  // 9-bit pattern for the 9 cells
       
-      Cell[][] cells = board.getCells();
+      Cell[][] cells = state.getCells();
       
       for (int row = 0; row < 3; ++row) {
          for (int col = 0; col < 3; ++col) {
-            if (cells[row][col].owner == thePlayer) {
+            if (cells[row][col].getOwner() == thePlayer) {
                pattern |= (1 << (row * 3 + col));
             }
          }

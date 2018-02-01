@@ -5,6 +5,7 @@
  */
 package ui;
 
+import models.Player;
 import javax.swing.JButton;
 
 /**
@@ -12,8 +13,8 @@ import javax.swing.JButton;
  * @author abaaltamimi
  */
 public class Cell {
-    Player owner;
-    JButton button;
+    private Player owner;
+    private JButton button;
 
     public Cell(JButton button) {
         this.button = button;
@@ -24,12 +25,16 @@ public class Cell {
         return owner;
     }
 
-    public boolean setOwner(Player owner) {
+    public boolean setOwnerIfEmpty(Player owner) {
         if(this.owner != null)
             return false;
         
         this.owner = owner;
         return true;
+    }
+    
+    public void setOwner(Player owner) {
+        this.owner = owner;
     }
 
     public JButton getButton() {

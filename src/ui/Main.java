@@ -5,6 +5,8 @@
  */
 package ui;
 
+import ai.MinmaxAlgorithm;
+import models.Player;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Executors;
@@ -12,6 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import models.Position;
 
 /**
  *
@@ -52,20 +55,14 @@ public class Main extends javax.swing.JFrame {
         board.initCell(2, 0, cell_20);
         board.initCell(2, 1, cell_21);
         board.initCell(2, 2, cell_22);
-	Player player = randomPlayer();
-        state = new State(board, player);
+        state = new State(board);
 	gameOver = false;
 	
-	if(player == Player.Computer)
+	if(state.isComputerPlaying())
 	    delayPlay();
 	
-        turnLabel.setText(state.label());
+        turnLabel.setText(state.getCurrentPlayer().getSign().getName());
 	
-    }
-    
-    public Player randomPlayer(){
-	int rand = new Random().nextInt(2);
-	return (rand == 1)? Player.Human : Player.Computer;
     }
 
     /**
@@ -197,7 +194,7 @@ public class Main extends javax.swing.JFrame {
 
     private void acquire(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_acquire
         // TODO add your handling code here:
-	if(gameOver || state.player != Player.Human)
+	if(gameOver || !state.isHumanPlaying())
 	    return;
 	System.out.println("Game isn't Over");
         CustomButton button = (CustomButton) evt.getSource();
@@ -220,10 +217,10 @@ public class Main extends javax.swing.JFrame {
 	if(gameOver)
 	    return;
 	
-	Computer computer = new Computer(board);
-	Board.Position move = computer.move();
+	state.currentPlayer.setAiAlgorithm(new MinmaxAlgorithm(state));
+	Position move = state.currentPlayer.getAiMove();
 	
-	state.acquire(getClass(), board.getCells()[move.row][move.column]);
+	state.acquire(getClass(), state.getCells()[move.getRow()][move.getColumn()]);
 	
 	setGameState();
     }
@@ -240,15 +237,15 @@ public class Main extends javax.swing.JFrame {
     }
     
     public void setGameState(){	
-	if(state.checkWin() == null && board.getEmptyPosition().size() != 0){
-	    turnLabel.setText(state.label()); 
+	if(state.isWin() == null && board.getEmptyPosition().size() != 0){
+	    turnLabel.setText(state.getCurrentPlayer().getSign().getName()); 
 	    return;
 	}
 	
 	gameOver = true;
 	
-	if(state.checkWin() != null)
-            turnLabel.setText("The player: " + state.checkWin() + " has won.");
+	if(state.isWin()!= null)
+            turnLabel.setText("The player: " + state.isWin() + " has won.");
         
 	if(board.getEmptyPosition().size() == 0)
 	    turnLabel.setText("It's a tie!!");          

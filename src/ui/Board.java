@@ -5,9 +5,12 @@
  */
 package ui;
 
+import models.Player;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import models.Position;
 
 /**
  *
@@ -66,23 +69,58 @@ public class Board {
 	return positions;
     }
     
+    public void acquire(Class<?> Class, Cell cell, Player currentPlayer){
+        if(cell.setOwnerIfEmpty(currentPlayer))
+            cell.getButton().setIcon(new ImageIcon(Class.getResource(currentPlayer.getSign().getPath())));
+    }
     
-    public static class Position {
-	int row;
-	int column;
+    public Player checkWin(){        
+        if(checkLine(cells[0][0], cells[0][1], cells[0][2]))
+            return cells[0][0].getOwner();
+        
+        if(checkLine(cells[1][0], cells[1][1], cells[1][2]))
+            return cells[1][0].getOwner();
+        
+        if(checkLine(cells[2][0], cells[2][1], cells[2][2]))
+            return cells[2][0].getOwner();
+       
+        if(checkLine(cells[0][0], cells[1][0], cells[2][0]))
+            return cells[0][0].getOwner();
+        
+        if(checkLine(cells[0][1], cells[1][1], cells[2][1]))
+            return cells[0][1].getOwner();
+        
+        if(checkLine(cells[0][2], cells[1][2], cells[2][2]))
+            return cells[0][2].getOwner();
+        
+        if(checkLine(cells[0][0], cells[1][1], cells[2][2]))
+            return cells[0][0].getOwner();
+        
+        if(checkLine(cells[0][2], cells[1][1], cells[2][0]))
+            return cells[0][2].getOwner();
+        
+        return null;
+    }
+    
+    private boolean checkLine(Cell... cells){
+        Player owner = cells[0].getOwner();
+        if(owner == null)
+            return false;
+        
+        boolean flag = true;
+        for(Cell cell : cells){
+            if(cell.getOwner() == null || cell.getOwner() != owner)
+                flag = false;
+        }
 
-	public Position(int row, int column) {
-	    this.row = row;
-	    this.column = column;
-	}
-
-	public int getRow() {
-	    return row;
-	}
-
-	public int getColumn() {
-	    return column;
-	}
-	
+        return flag;
+    }
+    
+    public boolean isTie(){
+	return getEmptyPosition().size() == 0;
+    }
+    
+    public boolean isFirstTurn(){
+	return getEmptyPosition().size() == 9;
     }
 }
