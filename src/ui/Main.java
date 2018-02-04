@@ -271,7 +271,7 @@ public class Main extends javax.swing.JFrame {
 	if(gameOver)
 	    return;
 	
-	state.getCurrentPlayer().setAiAlgorithm(new MinmaxAlgorithm(board));
+	state.getCurrentPlayer().setAiAlgorithm(new MinmaxAlgorithm(board, playerManager.getComputer(), playerManager.getHuman()));
 	
 	System.out.println("bofore ai move");
 	Position move = state.getCurrentPlayer().getAiMove();

@@ -16,6 +16,7 @@ import models.Computer;
 import models.Human;
 import models.Sign;
 import ui.State;
+import util.PlayerManager;
 
 /**
  *
@@ -24,23 +25,13 @@ import ui.State;
 public class MinmaxAlgorithm implements AIAlgorithm {
 
     private Board board;
-    
-    private enum Turn {
-	MY_TURN(new Computer()), ENEMY_TURN(new Human());
-	
-	private Player player;
-	
-	Turn(Player player){
-	    this.player = player;
-	}
-	
-	Player getPlayer(){
-	    return player;
-	}
-    }
+    private Player me;
+    private Player enemy;
 
-    public MinmaxAlgorithm(Board board) {
+    public MinmaxAlgorithm(Board board, Player me, Player enemy) {
 	this.board = board;
+	this.me = me;
+	this.enemy = enemy;
     }
 
     @Override
@@ -51,7 +42,7 @@ public class MinmaxAlgorithm implements AIAlgorithm {
 	}
 	
 	//We suppose the caller is the computer, but in realty human can also call minmax with no problom. we only use these object to simulate a game
-	int[] result = minimax(100, Turn.MY_TURN); // depth, max turn
+	int[] result = minimax(100, me); // depth, max turn
 	return new Position(result[1], result[2]);   // row, col
     }
 
@@ -60,12 +51,12 @@ public class MinmaxAlgorithm implements AIAlgorithm {
      * The minmax will simulate a game between 'human' and 'computer'
      * player. Return int[3] of {score, row, col}
      */
-    private int[] minimax(int depth, Turn turn) {
+    private int[] minimax(int depth, Player player) {
 	// Generate possible next moves in a List of int[2] of {row, col}.
 	List<int[]> nextMoves = generateMoves();
 	
 	// Computer is maximizing; while Human is minimizing
-	int bestScore = (turn == Turn.MY_TURN) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+	int bestScore = (player == me) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 	int currentScore;
 	int bestRow = -1;
 	int bestCol = -1;
@@ -77,10 +68,10 @@ public class MinmaxAlgorithm implements AIAlgorithm {
 	    for (int[] move : nextMoves) {
 		// Try this move for the current "player"
 		Cell[][] cells = board.getCells();
-		cells[move[0]][move[1]].setOwner(turn.getPlayer());
-		if (turn == Turn.MY_TURN) {  // mySeed (computer) is maximizing player
+		cells[move[0]][move[1]].setOwner(player);
+		if (player == me) {  // mySeed (computer) is maximizing player
 		    System.out.println("-=-=-=-=-=-=-=- Computer: Depth " + depth);
-		    currentScore = minimax(depth - 1, Turn.ENEMY_TURN)[0];
+		    currentScore = minimax(depth - 1, enemy)[0];
 		    if (currentScore > bestScore) {
 			bestScore = currentScore;
 			bestRow = move[0];
@@ -88,7 +79,7 @@ public class MinmaxAlgorithm implements AIAlgorithm {
 		    }
 		} else {  // oppSeed is minimizing player
 		    System.out.println("-=-=-=-=- Human Depth " + depth);
-		    currentScore = minimax(depth - 1, Turn.MY_TURN)[0];
+		    currentScore = minimax(depth - 1, me)[0];
 		    if (currentScore < bestScore) {
 			bestScore = currentScore;
 			bestRow = move[0];
@@ -111,7 +102,7 @@ public class MinmaxAlgorithm implements AIAlgorithm {
 	List<int[]> nextMoves = new ArrayList<int[]>(); // allocate List
 
 	// If gameover, i.e., no next move
-	if (hasWon(Turn.MY_TURN.getPlayer()) || hasWon(Turn.ENEMY_TURN.getPlayer())) {
+	if (hasWon(me) || hasWon(enemy)) {
 	    return nextMoves;   // return empty list
 	}
 
@@ -160,14 +151,14 @@ public class MinmaxAlgorithm implements AIAlgorithm {
 	Cell[][] cells = board.getCells();
 
 	// First cell
-	if (cells[row1][col1].getOwner() instanceof Computer) {
+	if (cells[row1][col1].getOwner() == me) {
 	    score = 1;
-	} else if (cells[row1][col1].getOwner() instanceof Human) {
+	} else if (cells[row1][col1].getOwner() == enemy) {
 	    score = -1;
 	}
 
 	// Second cell
-	if (cells[row2][col2].getOwner() instanceof Computer) {
+	if (cells[row2][col2].getOwner() == me) {
 	    if (score == 1) {   // cell1 is mySeed
 		score = 10;
 	    } else if (score == -1) {  // cell1 is oppSeed
@@ -175,7 +166,7 @@ public class MinmaxAlgorithm implements AIAlgorithm {
 	    } else {  // cell1 is empty
 		score = 1;
 	    }
-	} else if (cells[row2][col2].getOwner() instanceof Human) {
+	} else if (cells[row2][col2].getOwner() == enemy) {
 	    if (score == -1) { // cell1 is oppSeed
 		score = -10;
 	    } else if (score == 1) { // cell1 is mySeed
@@ -186,7 +177,7 @@ public class MinmaxAlgorithm implements AIAlgorithm {
 	}
 
 	// Third cell
-	if (cells[row3][col3].getOwner() instanceof Computer) {
+	if (cells[row3][col3].getOwner() == me) {
 	    if (score > 0) {  // cell1 and/or cell2 is mySeed
 		score *= 10;
 	    } else if (score < 0) {  // cell1 and/or cell2 is oppSeed
@@ -194,7 +185,7 @@ public class MinmaxAlgorithm implements AIAlgorithm {
 	    } else {  // cell1 and cell2 are empty
 		score = 1;
 	    }
-	} else if (cells[row3][col3].getOwner() instanceof Human) {
+	} else if (cells[row3][col3].getOwner() == enemy) {
 	    if (score < 0) {  // cell1 and/or cell2 is oppSeed
 		score *= 10;
 	    } else if (score > 1) {  // cell1 and/or cell2 is mySeed
