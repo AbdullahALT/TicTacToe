@@ -264,6 +264,7 @@ public class Main extends javax.swing.JFrame {
     
     private void changeSign(){
 	playerManager.switchSign();
+	setGame();
     }
     
     public void playComputer(){
@@ -294,8 +295,8 @@ public class Main extends javax.swing.JFrame {
     
     public void setGameState(){	
 	if(board.checkWin() == null && !board.isTie()){
-	    turnLabel.setText(state.getCurrentPlayer().getSign().getType() + " Turn"); 
 	    state.nextPlayer();
+	    turnLabel.setText(state.getCurrentPlayer().getSign().getType() + " Turn"); 
 	    return;
 	}
 	
