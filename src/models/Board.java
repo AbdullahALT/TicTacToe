@@ -74,11 +74,6 @@ public class Board implements Observable{
 	return positions;
     }
     
-//    public void acquire(Class<?> Class, Cell cell, Player currentPlayer){
-//        if(cell.setOwnerIfEmpty(currentPlayer))
-//            cell.getButton().setIcon(new ImageIcon(Class.getResource(currentPlayer.getSign().getPath())));
-//    }
-    
     public Player checkWin(){        
         if(checkLine(cells[0][0], cells[0][1], cells[0][2]))
             return cells[0][0].getOwner();
@@ -122,7 +117,7 @@ public class Board implements Observable{
     }
     
     public boolean isTie(){
-	return getEmptyPosition().size() == 0;
+	return getEmptyPosition().isEmpty();
     }
     
     public boolean isFirstTurn(){

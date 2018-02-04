@@ -42,7 +42,7 @@ public class MinmaxAlgorithm implements AIAlgorithm {
 	}
 	
 	//We suppose the caller is the computer, but in realty human can also call minmax with no problom. we only use these object to simulate a game
-	int[] result = minimax(100, me); // depth, max turn
+	int[] result = minmax(100, me); // depth, max turn
 	return new Position(result[1], result[2]);   // row, col
     }
 
@@ -51,7 +51,7 @@ public class MinmaxAlgorithm implements AIAlgorithm {
      * The minmax will simulate a game between 'human' and 'computer'
      * player. Return int[3] of {score, row, col}
      */
-    private int[] minimax(int depth, Player player) {
+    private int[] minmax(int depth, Player player) {
 	// Generate possible next moves in a List of int[2] of {row, col}.
 	List<int[]> nextMoves = generateMoves();
 	
@@ -69,17 +69,15 @@ public class MinmaxAlgorithm implements AIAlgorithm {
 		// Try this move for the current "player"
 		Cell[][] cells = board.getCells();
 		cells[move[0]][move[1]].setOwner(player);
-		if (player == me) {  // mySeed (computer) is maximizing player
-		    System.out.println("-=-=-=-=-=-=-=- Computer: Depth " + depth);
-		    currentScore = minimax(depth - 1, enemy)[0];
+		if (player == me) {  // Me (computer) is maximizing player
+		    currentScore = minmax(depth - 1, enemy)[0];
 		    if (currentScore > bestScore) {
 			bestScore = currentScore;
 			bestRow = move[0];
 			bestCol = move[1];
 		    }
-		} else {  // oppSeed is minimizing player
-		    System.out.println("-=-=-=-=- Human Depth " + depth);
-		    currentScore = minimax(depth - 1, me)[0];
+		} else {  // Opponent is minimizing player
+		    currentScore = minmax(depth - 1, me)[0];
 		    if (currentScore < bestScore) {
 			bestScore = currentScore;
 			bestRow = move[0];
