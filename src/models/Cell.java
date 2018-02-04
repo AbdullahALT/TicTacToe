@@ -14,10 +14,8 @@ import javax.swing.JButton;
  */
 public class Cell {
     private Player owner;
-    private JButton button;
 
-    public Cell(JButton button) {
-        this.button = button;
+    public Cell() {
         this.owner = null;
     }
 
@@ -35,10 +33,6 @@ public class Cell {
     
     public void setOwner(Player owner) {
         this.owner = owner;
-    }
-
-    public JButton getButton() {
-        return button;
     }
     
     
