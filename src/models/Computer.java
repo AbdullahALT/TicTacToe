@@ -13,6 +13,9 @@ import ui.State;
  */
 public class Computer extends Player{
 
+    public Computer() {
+    }
+
     public Computer(Sign sign) {
 	super(sign);
     }

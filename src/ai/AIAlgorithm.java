@@ -5,6 +5,7 @@
  */
 package ai;
 
+import models.Player;
 import models.Position;
 
 /**

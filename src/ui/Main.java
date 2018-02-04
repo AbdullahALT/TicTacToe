@@ -5,6 +5,7 @@
  */
 package ui;
 
+import models.Board;
 import ai.MinmaxAlgorithm;
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;
@@ -19,6 +20,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import models.Position;
 import models.Sign;
+import util.PlayerManager;
+import util.SignManager;
 
 /**
  *
@@ -29,9 +32,7 @@ public class Main extends javax.swing.JFrame {
     private State state;
     private  Board board;
     private boolean gameOver;
-    private Sign humanSign;
-    private Sign x;
-    private Sign o;
+    PlayerManager playerManager;
     
     /**
      * Creates new form Main
@@ -42,10 +43,7 @@ public class Main extends javax.swing.JFrame {
 	humanSignChoice.add("Play as X");
 	humanSignChoice.add("Play as O");
 	
-	x = new Sign("/resources/x.png", "X Turn", Sign.Type.X); 
-	o = new Sign("/resources/o.png", "O Turn", Sign.Type.O);
-	
-	humanSign = x;
+	playerManager = new PlayerManager(new SignManager("/resources/x.png", "/resources/o.png"));
         setGame();
 	
 	
@@ -55,10 +53,6 @@ public class Main extends javax.swing.JFrame {
 		changeSign();
 	    }
 	});
-	
-	turnLabel.setMinimumSize(new Dimension(100, 100));
-	turnLabel.setPreferredSize(new Dimension(100, 100));
-	turnLabel.setMaximumSize(new Dimension(100, 100));
     }
     
     public void setGame(){
@@ -82,14 +76,14 @@ public class Main extends javax.swing.JFrame {
         board.initCell(2, 0, cell_20);
         board.initCell(2, 1, cell_21);
         board.initCell(2, 2, cell_22);
-	Sign enemySign = (humanSign == x)? o : x;
-        state = new State(board, humanSign, enemySign);
+	        
+	state = new State(playerManager);
 	gameOver = false;
 	
 	if(state.isComputerPlaying())
 	    delayPlay();
 	
-        turnLabel.setText(state.getCurrentPlayer().getSign().getName());
+        turnLabel.setText(state.getCurrentPlayer().getSign().getType() + " Turn");
 	
     }
 
@@ -241,12 +235,14 @@ public class Main extends javax.swing.JFrame {
 	    return;
 	System.out.println("Game isn't Over");
         CustomButton button = (CustomButton) evt.getSource();
-        state.acquire(getClass(), board.getCellOf(button));
+        
+	board.acquire(getClass(), board.getCellOf(button), state.getCurrentPlayer());
 	
+	System.out.println("end of acquire");
 	setGameState();
 	
 	delayPlay();
-	
+	System.out.println("End delay player()");
     }//GEN-LAST:event_acquire
 
     private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetButtonActionPerformed
@@ -267,25 +263,21 @@ public class Main extends javax.swing.JFrame {
   
     
     private void changeSign(){
-	int index = humanSignChoice.getSelectedIndex();
-	if(index == 0)
-	    humanSign = x;
-	else 
-	    humanSign = o;
-	setGame();
-	System.out.println("Heeey");
+	playerManager.switchSign();
     }
     
     public void playComputer(){
-	
+	System.out.println("entered playComputer");
 	if(gameOver)
 	    return;
 	
-	state.currentPlayer.setAiAlgorithm(new MinmaxAlgorithm(state));
-	Position move = state.currentPlayer.getAiMove();
+	state.getCurrentPlayer().setAiAlgorithm(new MinmaxAlgorithm(board));
 	
-	state.acquire(getClass(), state.getCells()[move.getRow()][move.getColumn()]);
+	System.out.println("bofore ai move");
+	Position move = state.getCurrentPlayer().getAiMove();
 	
+	board.acquire(getClass(), board.getCells()[move.getRow()][move.getColumn()], state.getCurrentPlayer());
+	System.out.println("bofore set game state");
 	setGameState();
     }
     
@@ -301,18 +293,22 @@ public class Main extends javax.swing.JFrame {
     }
     
     public void setGameState(){	
-	if(state.isWin() == null && board.getEmptyPosition().size() != 0){
-	    turnLabel.setText(state.getCurrentPlayer().getSign().getName()); 
+	if(board.checkWin() == null && !board.isTie()){
+	    turnLabel.setText(state.getCurrentPlayer().getSign().getType() + " Turn"); 
+	    state.nextPlayer();
 	    return;
 	}
 	
+	System.out.print("Game is over");
+	
 	gameOver = true;
 	
-	if(state.isWin()!= null)
-            turnLabel.setText("The player: " + state.isWin() + " has won.");
+	if(board.checkWin() != null)
+            turnLabel.setText("The player: " + board.checkWin().getSign().getType() + " has won.");
         
-	if(board.getEmptyPosition().size() == 0)
+	if(board.isTie())
 	    turnLabel.setText("It's a tie!!");          
+	
 	
     }
     

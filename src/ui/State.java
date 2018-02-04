@@ -5,73 +5,50 @@
  */
 package ui;
 
+import models.Board;
+import models.Cell;
 import models.Player;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import models.Human;
 import models.Computer;
 import models.Sign;
+import util.PlayerManager;
 
 /**
  *
  * @author abaaltamimi
  */
 public class State {
-    Player currentPlayer;
-    Board board;
+    private Player currentPlayer;    
+    private PlayerManager playerManager;
     
-    Player human;
-    Player computer;
-    
-    public State(Board board, Sign humanSign, Sign computerSign) {
-	human = new Human(humanSign);
-	computer = new Computer(computerSign);
-        this.currentPlayer = (humanSign.getType() == Sign.Type.X)? human : computer;
-        this.board = board;
+    public State(PlayerManager playerManager) {
+	this.playerManager = playerManager;
+        this.currentPlayer = playerManager.getPlayerWithSign(Sign.Type.X);
     }
 
     public void humanTurn(){
-	currentPlayer = human;
+	currentPlayer = playerManager.getHuman();
     }
     
     public void computerTurn(){
-	currentPlayer = computer;
+	currentPlayer = playerManager.getComputer();
     }
 
     public Player getCurrentPlayer() {
 	return currentPlayer;
     }
     
-    public void acquire(Class<?> Class, Cell cell){
-	board.acquire(Class, cell, currentPlayer);
+    public void nextPlayer(){
 	currentPlayer.nextPlayer(this);
     }
     
-    public boolean isFirstTurn(){
-	return board.isFirstTurn();
-    }
-
-    public Player getHuman() {
-	return human;
-    }
-
-    public Player getComputer() {
-	return computer;
-    }
-    
-    public Cell[][] getCells(){
-	return board.getCells();
-    }
-    
     public boolean isComputerPlaying(){
-	return currentPlayer == computer;
+	return currentPlayer == playerManager.getComputer();
     }
     
     public boolean isHumanPlaying(){
-	return currentPlayer == human;
-    }
-    
-    public Player isWin(){
-	return board.checkWin();
+	return currentPlayer == playerManager.getHuman();
     }
 }

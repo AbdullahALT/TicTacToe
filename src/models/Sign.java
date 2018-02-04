@@ -15,21 +15,15 @@ public class Sign {
     }
     
     private String path;
-    private String name;
     private Type type;
 
-    public Sign(String path, String name, Type type) {
+    public Sign(String path, Type type) {
 	this.path = path;
-	this.name = name;
 	this.type = type;
     }
 
     public String getPath() {
 	return path;
-    }
-
-    public String getName() {
-	return name;
     }
 
     public Type getType() {

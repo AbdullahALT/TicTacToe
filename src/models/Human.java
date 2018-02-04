@@ -13,6 +13,9 @@ import ui.State;
  */
 public class Human extends Player {
 
+    public Human() {
+    }
+    
     public Human(Sign sign) {
 	super(sign);
     }

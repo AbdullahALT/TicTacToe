@@ -19,6 +19,9 @@ public abstract class Player {
     private Sign sign;
     private AIAlgorithm algorithm;
     
+    Player() {
+    }
+    
     Player(Sign sign) {
         this.sign = sign;
     }
@@ -36,4 +39,10 @@ public abstract class Player {
     public Position getAiMove(){
 	return algorithm.move();
     }
+
+    public void setSign(Sign sign) {
+	this.sign = sign;
+    }
+    
+    
 }
