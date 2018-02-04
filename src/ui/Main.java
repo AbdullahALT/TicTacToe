@@ -44,7 +44,33 @@ public class Main extends javax.swing.JFrame {
 	humanSignChoice.add("Play as O");
 	
 	playerManager = new PlayerManager(new SignManager("/resources/x.png", "/resources/o.png"));
-        setGame();
+	
+	board = new Board(3, 3);
+	board.register(cell_00);
+	board.register(cell_01);
+	board.register(cell_02);
+	board.register(cell_10);
+	board.register(cell_11);
+	board.register(cell_12);
+	board.register(cell_20);
+	board.register(cell_21);
+	board.register(cell_22);
+	
+	CustomButton.onUpdateListener onUpdateListener = (button, sign) -> {
+	    button.setIcon(new ImageIcon(getClass().getResource(sign.getPath())));
+	};
+	
+	cell_00.setOnPositionUpdateListener(0, 0, onUpdateListener);
+	cell_01.setOnPositionUpdateListener(0, 1, onUpdateListener);
+	cell_02.setOnPositionUpdateListener(0, 2, onUpdateListener);
+	cell_10.setOnPositionUpdateListener(1, 0, onUpdateListener);
+	cell_11.setOnPositionUpdateListener(1, 1, onUpdateListener);
+	cell_12.setOnPositionUpdateListener(1, 2, onUpdateListener);
+	cell_20.setOnPositionUpdateListener(2, 0, onUpdateListener);
+	cell_21.setOnPositionUpdateListener(2, 1, onUpdateListener);
+	cell_22.setOnPositionUpdateListener(2, 2, onUpdateListener);
+	
+        setNewGame();
 	
 	
 	humanSignChoice.addItemListener(new ItemListener() {
@@ -55,8 +81,8 @@ public class Main extends javax.swing.JFrame {
 	});
     }
     
-    public void setGame(){
-	board = new Board(3, 3);
+    public void setNewGame(){
+	
 	cell_00.setIcon(null);
 	cell_01.setIcon(null);
 	cell_02.setIcon(null);
@@ -66,17 +92,7 @@ public class Main extends javax.swing.JFrame {
 	cell_20.setIcon(null);
 	cell_21.setIcon(null);
 	cell_22.setIcon(null);
-	
-        board.initCell(0, 0, cell_00);
-        board.initCell(0, 1, cell_01);
-        board.initCell(0, 2, cell_02);
-        board.initCell(1, 0, cell_10);
-        board.initCell(1, 1, cell_11);
-        board.initCell(1, 2, cell_12);
-        board.initCell(2, 0, cell_20);
-        board.initCell(2, 1, cell_21);
-        board.initCell(2, 2, cell_22);
-	        
+
 	state = new State(playerManager);
 	gameOver = false;
 	
@@ -236,7 +252,7 @@ public class Main extends javax.swing.JFrame {
 	System.out.println("Game isn't Over");
         CustomButton button = (CustomButton) evt.getSource();
         
-	board.acquire(getClass(), board.getCellOf(button), state.getCurrentPlayer());
+	board.acquire(button.getPosition(), state.getCurrentPlayer());
 	
 	System.out.println("end of acquire");
 	setGameState();
@@ -247,7 +263,7 @@ public class Main extends javax.swing.JFrame {
 
     private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetButtonActionPerformed
         // TODO add your handling code here:
-	setGame();
+	setNewGame();
     }//GEN-LAST:event_resetButtonActionPerformed
 
     private void changeSign(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_changeSign
@@ -264,7 +280,7 @@ public class Main extends javax.swing.JFrame {
     
     private void changeSign(){
 	playerManager.switchSign();
-	setGame();
+	setNewGame();
     }
     
     public void playComputer(){
@@ -277,7 +293,7 @@ public class Main extends javax.swing.JFrame {
 	System.out.println("bofore ai move");
 	Position move = state.getCurrentPlayer().getAiMove();
 	
-	board.acquire(getClass(), board.getCells()[move.getRow()][move.getColumn()], state.getCurrentPlayer());
+	board.acquire(move, state.getCurrentPlayer());
 	System.out.println("bofore set game state");
 	setGameState();
     }

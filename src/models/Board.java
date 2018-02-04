@@ -16,8 +16,9 @@ import models.Position;
  *
  * @author abaaltamimi
  */
-public class Board {
+public class Board implements Observable{
     
+    private List<Observer> observers;
     private Cell[][] cells;
     private int maxRow;
     private int maxColum;
@@ -25,31 +26,46 @@ public class Board {
     public Board(int maxRow, int maxColumn) {
         this.maxColum = maxColumn;
 	this.maxRow = maxRow;
-	cells = new Cell[maxRow][maxColumn];
+	this.cells = new Cell[maxRow][maxColumn];
+	this.observers = new ArrayList<>();
+	initCells();
     }
     
-    public void initCell(int row, int column, JButton button){
-        cells[row][column] = new Cell(button);
+    @Override
+    public void register(Observer observer){
+	this.observers.add(observer);
     }
     
-    public void acquire(int row, int column, Player owner){
-        cells[row][column].setOwner(owner);
+    private void initCells(){
+	for(int row = 0; row < maxRow; row++)
+	    for(int column = 0; column < maxColum; column++)
+		this.cells[row][column] = new Cell();
+    }
+    
+    public void acquire(Position position, Player owner){
+        this.cells[position.getRow()][position.getColumn()].setOwnerIfEmpty(owner);
+	notify(position, owner.getSign());
+    }
+    
+    @Override
+    public void notify(Position position, Sign sign){
+	observers.forEach(observer -> observer.update(position, sign));
     }
 
     public Cell[][] getCells() {
         return cells;
     }
     
-    public Cell getCellOf(JButton button){
-        for(Cell cellRow[] : cells){
-            for(Cell cell : cellRow){
-                if(cell.getButton() == button){
-                    return cell;
-                }
-            }
-        }
-        return null;
-    }
+//    public Cell getCellOf(JButton button){
+//        for(Cell cellRow[] : cells){
+//            for(Cell cell : cellRow){
+//                if(cell.getButton() == button){
+//                    return cell;
+//                }
+//            }
+//        }
+//        return null;
+//    }
     
     public Cell getCellOf(Position position){
         return cells[position.getRow()][position.getColumn()];
@@ -69,10 +85,10 @@ public class Board {
 	return positions;
     }
     
-    public void acquire(Class<?> Class, Cell cell, Player currentPlayer){
-        if(cell.setOwnerIfEmpty(currentPlayer))
-            cell.getButton().setIcon(new ImageIcon(Class.getResource(currentPlayer.getSign().getPath())));
-    }
+//    public void acquire(Class<?> Class, Cell cell, Player currentPlayer){
+//        if(cell.setOwnerIfEmpty(currentPlayer))
+//            cell.getButton().setIcon(new ImageIcon(Class.getResource(currentPlayer.getSign().getPath())));
+//    }
     
     public Player checkWin(){        
         if(checkLine(cells[0][0], cells[0][1], cells[0][2]))
@@ -123,4 +139,6 @@ public class Board {
     public boolean isFirstTurn(){
 	return getEmptyPosition().size() == 9;
     }
+    
+    
 }
