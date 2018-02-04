@@ -21,19 +21,21 @@ import util.PlayerManager;
  */
 public class State {
     private Player currentPlayer;    
-    private PlayerManager playerManager;
+    private Player computer;
+    private Player human;
     
     public State(PlayerManager playerManager) {
-	this.playerManager = playerManager;
+	this.computer = playerManager.getComputer();
+	this.human = playerManager.getHuman();
         this.currentPlayer = playerManager.getPlayerWithSign(Sign.Type.X);
     }
 
     public void humanTurn(){
-	currentPlayer = playerManager.getHuman();
+	currentPlayer = human;
     }
     
     public void computerTurn(){
-	currentPlayer = playerManager.getComputer();
+	currentPlayer = computer;
     }
 
     public Player getCurrentPlayer() {
@@ -45,10 +47,10 @@ public class State {
     }
     
     public boolean isComputerPlaying(){
-	return currentPlayer == playerManager.getComputer();
+	return currentPlayer == computer;
     }
     
     public boolean isHumanPlaying(){
-	return currentPlayer == playerManager.getHuman();
+	return currentPlayer == human;
     }
 }

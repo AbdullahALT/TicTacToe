@@ -36,7 +36,7 @@ public class Board implements Observable{
 	this.observers.add(observer);
     }
     
-    private void initCells(){
+    public final void initCells(){
 	for(int row = 0; row < maxRow; row++)
 	    for(int column = 0; column < maxColum; column++)
 		this.cells[row][column] = new Cell();
@@ -55,17 +55,6 @@ public class Board implements Observable{
     public Cell[][] getCells() {
         return cells;
     }
-    
-//    public Cell getCellOf(JButton button){
-//        for(Cell cellRow[] : cells){
-//            for(Cell cell : cellRow){
-//                if(cell.getButton() == button){
-//                    return cell;
-//                }
-//            }
-//        }
-//        return null;
-//    }
     
     public Cell getCellOf(Position position){
         return cells[position.getRow()][position.getColumn()];

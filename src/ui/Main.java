@@ -92,6 +92,8 @@ public class Main extends javax.swing.JFrame {
 	cell_20.setIcon(null);
 	cell_21.setIcon(null);
 	cell_22.setIcon(null);
+	
+	board.initCells();
 
 	state = new State(playerManager);
 	gameOver = false;
