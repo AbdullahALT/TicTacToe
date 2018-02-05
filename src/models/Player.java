@@ -6,6 +6,7 @@
 package models;
 
 import ai.AIAlgorithm;
+import java.util.Objects;
 import ui.State;
 
 /**
@@ -43,6 +44,17 @@ public abstract class Player {
     public void setSign(Sign sign) {
 	this.sign = sign;
     }
-    
+
+    @Override
+    public boolean equals(Object obj) {
+	if(obj == null)
+	    return false;
+	
+	if (getClass() != obj.getClass())
+	    return false;
+	
+	final Player other = (Player) obj;
+	return this.sign.getType() == other.sign.getType();
+    }
     
 }

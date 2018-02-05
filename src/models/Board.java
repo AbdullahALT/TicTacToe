@@ -5,6 +5,8 @@
  */
 package models;
 
+import ai.Heuristic;
+import ai.IHeuristic;
 import models.Player;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,7 @@ public class Board implements Observable{
     private Cell[][] cells;
     private int maxRow;
     private int maxColum;
+    private IHeuristic heuristic;
 
     public Board(int maxRow, int maxColumn) {
         this.maxColum = maxColumn;
@@ -36,6 +39,11 @@ public class Board implements Observable{
 	this.observers.add(observer);
     }
     
+    @Override
+    public void notify(Position position, Sign sign){
+	observers.forEach(observer -> observer.update(position, sign));
+    }
+    
     public final void initCells(){
 	for(int row = 0; row < maxRow; row++)
 	    for(int column = 0; column < maxColum; column++)
@@ -46,17 +54,12 @@ public class Board implements Observable{
         this.cells[position.getRow()][position.getColumn()].setOwnerIfEmpty(owner);
 	notify(position, owner.getSign());
     }
-    
-    @Override
-    public void notify(Position position, Sign sign){
-	observers.forEach(observer -> observer.update(position, sign));
-    }
 
-    public Cell[][] getCells() {
-        return cells;
-    }
-    
-    public Cell getCellOf(Position position){
+//    public Cell[][] getCells() {
+//        return cells;
+//    }
+//    
+    public Cell getCellAt(Position position){
         return cells[position.getRow()][position.getColumn()];
     }
     
@@ -124,5 +127,11 @@ public class Board implements Observable{
 	return getEmptyPosition().size() == 9;
     }
     
+    public int evaluate(Player player){
+	return heuristic.evaluate(cells, player);
+    }
     
+    public void setHeuristic(IHeuristic heuristic){
+	this.heuristic = heuristic;
+    }
 }

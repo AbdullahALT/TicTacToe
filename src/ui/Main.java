@@ -5,6 +5,7 @@
  */
 package ui;
 
+import ai.Heuristic;
 import models.Board;
 import ai.MinmaxAlgorithm;
 import java.awt.Dimension;
@@ -46,6 +47,8 @@ public class Main extends javax.swing.JFrame {
 	playerManager = new PlayerManager(new SignManager("/resources/x.png", "/resources/o.png"));
 	
 	board = new Board(3, 3);
+	board.setHeuristic(new Heuristic());
+	
 	board.register(cell_00);
 	board.register(cell_01);
 	board.register(cell_02);
@@ -81,6 +84,7 @@ public class Main extends javax.swing.JFrame {
     }
     
     public void setNewGame(){
+	
 	
 	cell_00.setIcon(null);
 	cell_01.setIcon(null);
