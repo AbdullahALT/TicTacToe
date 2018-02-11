@@ -5,6 +5,13 @@
  */
 package ui;
 
+import ai.Heuristic;
+import models.Board;
+import ai.MinmaxAlgorithm;
+import java.awt.Dimension;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import models.Player;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Executors;
@@ -12,6 +19,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import models.Position;
+import models.Sign;
+import util.PlayerManager;
+import util.SignManager;
 
 /**
  *
@@ -22,17 +33,59 @@ public class Main extends javax.swing.JFrame {
     private State state;
     private  Board board;
     private boolean gameOver;
+    PlayerManager playerManager;
     
     /**
      * Creates new form Main
      */
     public Main() {
         initComponents();
-        setGame();
+	
+	humanSignChoice.add("Play as X");
+	humanSignChoice.add("Play as O");
+	
+	playerManager = new PlayerManager(new SignManager("/resources/x.png", "/resources/o.png"));
+	
+	board = new Board();
+	board.setHeuristic(new Heuristic());
+	
+	board.register(cell_00);
+	board.register(cell_01);
+	board.register(cell_02);
+	board.register(cell_10);
+	board.register(cell_11);
+	board.register(cell_12);
+	board.register(cell_20);
+	board.register(cell_21);
+	board.register(cell_22);
+	
+	CustomButton.onUpdateListener onUpdateListener = (button, sign) -> {
+	    button.setIcon(new ImageIcon(getClass().getResource(sign.getPath())));
+	};
+	
+	cell_00.setOnPositionUpdateListener(0, 0, onUpdateListener);
+	cell_01.setOnPositionUpdateListener(0, 1, onUpdateListener);
+	cell_02.setOnPositionUpdateListener(0, 2, onUpdateListener);
+	cell_10.setOnPositionUpdateListener(1, 0, onUpdateListener);
+	cell_11.setOnPositionUpdateListener(1, 1, onUpdateListener);
+	cell_12.setOnPositionUpdateListener(1, 2, onUpdateListener);
+	cell_20.setOnPositionUpdateListener(2, 0, onUpdateListener);
+	cell_21.setOnPositionUpdateListener(2, 1, onUpdateListener);
+	cell_22.setOnPositionUpdateListener(2, 2, onUpdateListener);
+	
+        setNewGame();
+
+	humanSignChoice.addItemListener(new ItemListener() {
+	    @Override
+	    public void itemStateChanged(ItemEvent e) {
+		changeSign();
+	    }
+	});
     }
     
-    public void setGame(){
-	board = new Board(3, 3);
+    public void setNewGame(){
+	
+	
 	cell_00.setIcon(null);
 	cell_01.setIcon(null);
 	cell_02.setIcon(null);
@@ -43,29 +96,17 @@ public class Main extends javax.swing.JFrame {
 	cell_21.setIcon(null);
 	cell_22.setIcon(null);
 	
-        board.initCell(0, 0, cell_00);
-        board.initCell(0, 1, cell_01);
-        board.initCell(0, 2, cell_02);
-        board.initCell(1, 0, cell_10);
-        board.initCell(1, 1, cell_11);
-        board.initCell(1, 2, cell_12);
-        board.initCell(2, 0, cell_20);
-        board.initCell(2, 1, cell_21);
-        board.initCell(2, 2, cell_22);
-	Player player = randomPlayer();
-        state = new State(board, player);
+	board.initCells();
+
+	state = new State(playerManager);
 	gameOver = false;
 	
-	if(player == Player.Computer)
+	if(state.isComputerPlaying())
 	    delayPlay();
 	
-        turnLabel.setText(state.label());
+        turnLabel.setText(state.getCurrentPlayer().getSign().getType() + " Turn");
 	
-    }
-    
-    public Player randomPlayer(){
-	int rand = new Random().nextInt(2);
-	return (rand == 1)? Player.Human : Player.Computer;
+	hintsButton.setEnabled(true);
     }
 
     /**
@@ -90,7 +131,9 @@ public class Main extends javax.swing.JFrame {
         cell_22 = new ui.CustomButton();
         jPanel3 = new javax.swing.JPanel();
         turnLabel = new javax.swing.JLabel();
-        resetButton = new java.awt.Button();
+        humanSignChoice = new java.awt.Choice();
+        hintsButton = new java.awt.Button();
+        resetButton1 = new java.awt.Button();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -163,19 +206,41 @@ public class Main extends javax.swing.JFrame {
 
         jPanel2.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 110, 410, 270));
 
-        jPanel3.setLayout(new java.awt.BorderLayout(50, 50));
+        jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         turnLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         turnLabel.setText("Turn Indicator");
-        jPanel3.add(turnLabel, java.awt.BorderLayout.CENTER);
+        jPanel3.add(turnLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 20, 410, 66));
 
-        resetButton.setLabel("Reset");
-        resetButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                resetButtonActionPerformed(evt);
+        humanSignChoice.addInputMethodListener(new java.awt.event.InputMethodListener() {
+            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
+                changeSign(evt);
+            }
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
             }
         });
-        jPanel3.add(resetButton, java.awt.BorderLayout.PAGE_END);
+        humanSignChoice.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                humanSignChoicePropertyChange(evt);
+            }
+        });
+        jPanel3.add(humanSignChoice, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 410, -1));
+
+        hintsButton.setLabel("Hint");
+        hintsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                hintsButtonActionPerformed(evt);
+            }
+        });
+        jPanel3.add(hintsButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 86, 190, -1));
+
+        resetButton1.setLabel("Reset");
+        resetButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resetButton1ActionPerformed(evt);
+            }
+        });
+        jPanel3.add(resetButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 86, 200, -1));
 
         jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 410, 110));
 
@@ -197,34 +262,63 @@ public class Main extends javax.swing.JFrame {
 
     private void acquire(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_acquire
         // TODO add your handling code here:
-	if(gameOver || state.player != Player.Human)
+	if(gameOver || !state.isHumanPlaying())
 	    return;
 	System.out.println("Game isn't Over");
         CustomButton button = (CustomButton) evt.getSource();
-        state.acquire(getClass(), board.getCellOf(button));
+        
+	board.acquire(button.getPosition(), state.getCurrentPlayer());
 	
+	System.out.println("end of acquire");
 	setGameState();
 	
 	delayPlay();
-	
+	System.out.println("End delay player()");
     }//GEN-LAST:event_acquire
 
-    private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetButtonActionPerformed
+    private void hintsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hintsButtonActionPerformed
         // TODO add your handling code here:
-	setGame();
-    }//GEN-LAST:event_resetButtonActionPerformed
+	if(!gameOver && state.isHumanPlaying()){
+	    state.getCurrentPlayer().setAiAlgorithm(new MinmaxAlgorithm(board, playerManager.getHuman(), playerManager.getComputer()));
+	    Position position = state.getCurrentPlayer().getAiMove();
+	    turnLabel.setText("Your best move is positon {" + position.getRow() + " ," + position.getColumn() + "}");
+	}
+    }//GEN-LAST:event_hintsButtonActionPerformed
+
+    private void changeSign(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_changeSign
+        // TODO add your handling code here:
+	
+	
+    }//GEN-LAST:event_changeSign
+
+    private void humanSignChoicePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_humanSignChoicePropertyChange
+        // TODO add your handling code here:
+	changeSign();
+    }//GEN-LAST:event_humanSignChoicePropertyChange
+
+    private void resetButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetButton1ActionPerformed
+        // TODO add your handling code here:
+	setNewGame();
+    }//GEN-LAST:event_resetButton1ActionPerformed
   
     
+    private void changeSign(){
+	playerManager.switchSign();
+	setNewGame();
+    }
+    
     public void playComputer(){
-	
+	System.out.println("entered playComputer");
 	if(gameOver)
 	    return;
 	
-	Computer computer = new Computer(board);
-	Board.Position move = computer.move();
+	state.getCurrentPlayer().setAiAlgorithm(new MinmaxAlgorithm(board, playerManager.getComputer(), playerManager.getHuman()));
 	
-	state.acquire(getClass(), board.getCells()[move.row][move.column]);
+	System.out.println("bofore ai move");
+	Position move = state.getCurrentPlayer().getAiMove();
 	
+	board.acquire(move, state.getCurrentPlayer());
+	System.out.println("bofore set game state");
 	setGameState();
     }
     
@@ -240,19 +334,23 @@ public class Main extends javax.swing.JFrame {
     }
     
     public void setGameState(){	
-	if(state.checkWin() == null && board.getEmptyPosition().size() != 0){
-	    turnLabel.setText(state.label()); 
+	if(board.checkWin() == null && !board.isTie()){
+	    state.nextPlayer();
+	    turnLabel.setText(state.getCurrentPlayer().getSign().getType() + " Turn"); 
 	    return;
 	}
 	
+	System.out.print("Game is over");
+	
 	gameOver = true;
 	
-	if(state.checkWin() != null)
-            turnLabel.setText("The player: " + state.checkWin() + " has won.");
+	if(board.checkWin() != null)
+            turnLabel.setText("The player: " + board.checkWin().getSign().getType() + " has won.");
         
-	if(board.getEmptyPosition().size() == 0)
+	if(board.isTie())
 	    turnLabel.setText("It's a tie!!");          
 	
+	hintsButton.setEnabled(false);
     }
     
     
@@ -301,10 +399,12 @@ public class Main extends javax.swing.JFrame {
     private ui.CustomButton cell_20;
     private ui.CustomButton cell_21;
     private ui.CustomButton cell_22;
+    private java.awt.Button hintsButton;
+    private java.awt.Choice humanSignChoice;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private java.awt.Button resetButton;
+    private java.awt.Button resetButton1;
     private javax.swing.JLabel turnLabel;
     // End of variables declaration//GEN-END:variables
 }

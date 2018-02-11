@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ui;
+package models;
 
+import models.Player;
 import javax.swing.JButton;
 
 /**
@@ -12,11 +13,9 @@ import javax.swing.JButton;
  * @author abaaltamimi
  */
 public class Cell {
-    Player owner;
-    JButton button;
+    private Player owner;
 
-    public Cell(JButton button) {
-        this.button = button;
+    public Cell() {
         this.owner = null;
     }
 
@@ -24,16 +23,16 @@ public class Cell {
         return owner;
     }
 
-    public boolean setOwner(Player owner) {
+    public boolean setOwnerIfEmpty(Player owner) {
         if(this.owner != null)
             return false;
         
         this.owner = owner;
         return true;
     }
-
-    public JButton getButton() {
-        return button;
+    
+    public void setOwner(Player owner) {
+        this.owner = owner;
     }
     
     
