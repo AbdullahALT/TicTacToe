@@ -46,7 +46,7 @@ public class Main extends javax.swing.JFrame {
 	
 	playerManager = new PlayerManager(new SignManager("/resources/x.png", "/resources/o.png"));
 	
-	board = new Board(3, 3);
+	board = new Board();
 	board.setHeuristic(new Heuristic());
 	
 	board.register(cell_00);

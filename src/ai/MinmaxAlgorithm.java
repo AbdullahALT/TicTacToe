@@ -41,8 +41,8 @@ public class MinmaxAlgorithm implements AIAlgorithm {
 	    return new Position(rand.nextInt(3), rand.nextInt(3));
 	}
 	
-	//We suppose the caller is the computer, but in realty human can also call minmax with no problom. we only use these object to simulate a game
 	int[] result = minmax(100, me); // depth, max turn
+	System.out.println("Best: {" + result[1] + ", " + result[2] + "}");
 	return new Position(result[1], result[2]);   // row, col
     }
 
@@ -54,6 +54,7 @@ public class MinmaxAlgorithm implements AIAlgorithm {
     private int[] minmax(int depth, Player player) {
 	// Generate possible next moves in a List of int[2] of {row, col}.
 	System.out.println("Depth: " + depth);
+	System.out.println(board);
 	List<Position> nextMoves = generateMoves();
 	// Computer is maximizing; while Human is minimizing
 	int bestScore = (player.equals(me)) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
@@ -63,7 +64,7 @@ public class MinmaxAlgorithm implements AIAlgorithm {
 
 	if (nextMoves.isEmpty() || depth == 0) {
 	    // Gameover or depth reached, evaluate score
-	    bestScore = board.evaluate(player);
+	    bestScore = board.evaluate(me);
 	} else {
 	    for (Position position : nextMoves) {
 		// Try this move for the current "player"
@@ -87,7 +88,6 @@ public class MinmaxAlgorithm implements AIAlgorithm {
 		board.getCellAt(position).setOwner(null);
 	    }
 	}
-	System.out.println("Out!");
 	return new int[]{bestScore, bestRow, bestCol};
     }
     

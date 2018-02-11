@@ -22,16 +22,17 @@ public class Board implements Observable{
     
     private List<Observer> observers;
     private Cell[][] cells;
-    private int maxRow;
-    private int maxColum;
     private IHeuristic heuristic;
 
-    public Board(int maxRow, int maxColumn) {
-        this.maxColum = maxColumn;
-	this.maxRow = maxRow;
-	this.cells = new Cell[maxRow][maxColumn];
+    public Board() {
+	this.cells = new Cell[3][3];
 	this.observers = new ArrayList<>();
 	initCells();
+    }
+    
+    //For testing 
+    public Board(Cell[][] cells){
+	this.cells = cells;
     }
     
     @Override
@@ -45,8 +46,8 @@ public class Board implements Observable{
     }
     
     public final void initCells(){
-	for(int row = 0; row < maxRow; row++)
-	    for(int column = 0; column < maxColum; column++)
+	for(int row = 0; row < 3; row++)
+	    for(int column = 0; column < 3; column++)
 		this.cells[row][column] = new Cell();
     }
     
@@ -67,8 +68,8 @@ public class Board implements Observable{
 	
 	List<Position> positions = new ArrayList<>();
 	
-	for(int row = 0; row < maxRow; row++){
-	    for(int colum = 0; colum < maxColum; colum++){
+	for(int row = 0; row < 3; row++){
+	    for(int colum = 0; colum < 3; colum++){
 		if(cells[row][colum].getOwner() == null)
 		    positions.add(new Position(row, colum));
     	    }	
@@ -134,4 +135,29 @@ public class Board implements Observable{
     public void setHeuristic(IHeuristic heuristic){
 	this.heuristic = heuristic;
     }
+
+    @Override
+    public String toString() {
+	String cell00 = (cells[0][0].getOwner() == null)? " " : cells[0][0].getOwner().getSign().getType().toString();
+	String cell01 = (cells[0][1].getOwner() == null)? " " : cells[0][1].getOwner().getSign().getType().toString();
+	String cell02 = (cells[0][2].getOwner() == null)? " " : cells[0][2].getOwner().getSign().getType().toString();
+	
+	String cell10 = (cells[1][0].getOwner() == null)? " " : cells[1][0].getOwner().getSign().getType().toString();
+	String cell11 = (cells[1][1].getOwner() == null)? " " : cells[1][1].getOwner().getSign().getType().toString();
+	String cell12 = (cells[1][2].getOwner() == null)? " " : cells[1][2].getOwner().getSign().getType().toString();
+	
+	String cell20 = (cells[2][0].getOwner() == null)? " " : cells[2][0].getOwner().getSign().getType().toString();
+	String cell21 = (cells[2][1].getOwner() == null)? " " : cells[2][1].getOwner().getSign().getType().toString();
+	String cell22 = (cells[2][2].getOwner() == null)? " " : cells[2][2].getOwner().getSign().getType().toString();
+	
+	
+	
+	return    cell00 + " | " + cell01 + " | " + cell02 + "\n"
+		+ "---------" + "\n"
+		+ cell10 + " | " + cell11 + " | " + cell12 + "\n"
+		+ "---------" + "\n"
+		+ cell20 + " | " + cell21 + " | " + cell22 + "\n";
+    }
+    
+    
 }
