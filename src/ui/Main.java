@@ -304,7 +304,9 @@ public class Main extends javax.swing.JFrame {
     
     private void changeSign(){
 	playerManager.switchSign();
-	setNewGame();
+	setNewGame(); 
+	
+	
     }
     
     public void playComputer(){

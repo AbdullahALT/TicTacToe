@@ -41,7 +41,7 @@ public class MinmaxAlgorithm implements AIAlgorithm {
 	    return new Position(rand.nextInt(3), rand.nextInt(3));
 	}
 	
-	int[] result = minmax(100, me); // depth, max turn
+	int[] result = minmax(100, me, Integer.MIN_VALUE, Integer.MAX_VALUE); // depth, max turn
 	System.out.println("Best: {" + result[1] + ", " + result[2] + "}");
 	return new Position(result[1], result[2]);   // row, col
     }
@@ -51,44 +51,46 @@ public class MinmaxAlgorithm implements AIAlgorithm {
      * The minmax will simulate a game between 'human' and 'computer'
      * player. Return int[3] of {score, row, col}
      */
-    private int[] minmax(int depth, Player player) {
+    private int[] minmax(int depth, Player player, int alpha, int beta) {
 	// Generate possible next moves in a List of int[2] of {row, col}.
 	System.out.println("Depth: " + depth);
 	System.out.println(board);
 	List<Position> nextMoves = generateMoves();
 	// Computer is maximizing; while Human is minimizing
-	int bestScore = (player.equals(me)) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-	int currentScore;
+	int score;
 	int bestRow = -1;
 	int bestCol = -1;
 
 	if (nextMoves.isEmpty() || depth == 0) {
 	    // Gameover or depth reached, evaluate score
-	    bestScore = board.evaluate(me);
+	    score = board.evaluate(me);
+	    return new int[] {score, bestRow, bestCol};
 	} else {
 	    for (Position position : nextMoves) {
 		// Try this move for the current "player"
 		board.getCellAt(position).setOwner(player);
 		if (player.equals(me)) {  // Me (computer) is maximizing player
-		    currentScore = minmax(depth - 1, enemy)[0];
-		    if (currentScore > bestScore) {
-			bestScore = currentScore;
+		    score = minmax(depth - 1, enemy, alpha, beta)[0];
+		    if (score > alpha) {
+			alpha = score;
 			bestRow = position.getRow();
 			bestCol = position.getColumn();
 		    }
 		} else {  // Opponent is minimizing player
-		    currentScore = minmax(depth - 1, me)[0];
-		    if (currentScore < bestScore) {
-			bestScore = currentScore;
+		    score = minmax(depth - 1, me, alpha, beta)[0];
+		    if (score < beta) {
+			beta = score;
 			bestRow = position.getRow();
 			bestCol = position.getColumn();
 		    }
 		}
 		// Undo move
 		board.getCellAt(position).setOwner(null);
+		// cut-off
+		if (alpha >= beta) break;
 	    }
 	}
-	return new int[]{bestScore, bestRow, bestCol};
+	return new int[]{(player.equals(me)? alpha : beta), bestRow, bestCol};
     }
     
     private List<Position> generateMoves(){
